@@ -23,11 +23,11 @@ jobs:
         with:
           node-version: '22.x'
 
-      - name: pnpm install, build, and test
+      - name: npm install, build, and test
         run: |
-          pnpm install
-          pnpm run build --if-present
-          pnpm run test --if-present
+          npm install
+          npm run build --if-present
+          npm run test --if-present
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -54,3 +54,4 @@ jobs:
           package: .
 
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_329EE5FB4C2C43398C76EDE16631A9CB }}
+
