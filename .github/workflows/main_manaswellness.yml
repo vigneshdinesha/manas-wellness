@@ -1,35 +1,48 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
+# Build & Deploy Next.js app to Azure App Service (Linux)
 name: Build and deploy Node.js app to Azure Web App - manaswellness
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
+
+    env:
+      # These are used at build time if your server code is evaluated during build
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      # Add any others your build needs:
+      # WEBHOOK_SECRET: ${{ secrets.WEBHOOK_SECRET }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v3
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: '20.x'
+          cache: 'npm'
 
-      - name: npm install, build, and test
+      - name: Create .env.production.local for Next.js build
         run: |
-          npm install
+          {
+            echo "STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}"
+            echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}"
+            # echo "WEBHOOK_SECRET=${WEBHOOK_SECRET}"
+          } > .env.production.local
+
+      - name: Install deps / build / (optional) test
+        run: |
+          npm ci
           npm run build --if-present
           npm run test --if-present
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deployment
         uses: actions/upload-artifact@v4
         with:
           name: node-app
@@ -38,20 +51,34 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: node-app
-      
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
+
+      # Log in to Azure using the publish profile, so we can set App Settings
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_329EE5FB4C2C43398C76EDE16631A9CB }}
+
+      # Ensure runtime env vars are present on the App Service (Production slot)
+      - name: Set Azure App Settings (runtime env)
+        run: |
+          az webapp config appsettings set \
+            --name manaswellness \
+            --resource-group "$(az webapp show --name manaswellness --query resourceGroup -o tsv)" \
+            --settings \
+              STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
+              NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+              # Add more as needed: KEY=value
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'manaswellness'
           slot-name: 'Production'
           package: .
-
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_329EE5FB4C2C43398C76EDE16631A9CB }}
-
