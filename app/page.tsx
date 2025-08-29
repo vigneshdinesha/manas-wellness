@@ -378,23 +378,23 @@ export default function ManasWellnessWebsite() {
                         <span className="text-base font-medium text-dark-teal">Share our mission</span>
                       </div>
                     </div>
-                    <div className="flex space-x-3 ml-8">
+                    <div className="flex flex-wrap gap-3 ml-8">
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-blue-500/30 hover:bg-blue-50 text-blue-600 bg-transparent"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border-blue-500/30 hover:bg-blue-50 text-blue-600 bg-transparent"
                         onClick={() => window.open('https://www.facebook.com/share/1Ga3hKqTkZ/?mibextid=wwXIfr', '_blank')}
                       >
-                        <Facebook className="h-4 w-4 mr-2" />
+                        <Facebook className="h-4 w-4" />
                         Facebook
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="border-pink-500/30 hover:bg-pink-50 text-pink-600 bg-transparent"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border-pink-500/30 hover:bg-pink-50 text-pink-600 bg-transparent"
                         onClick={() => window.open('https://www.instagram.com/manas_wellness_project?igsh=azRvOWFsZzJzeWhu', '_blank')}
                       >
-                        <Instagram className="h-4 w-4 mr-2" />
+                        <Instagram className="h-4 w-4" />
                         Instagram
                       </Button>
                     </div>
@@ -420,7 +420,7 @@ export default function ManasWellnessWebsite() {
                   <img
                     src="/mwplogo.png.jpg"
                     alt="Manas Wellness Project Logo"
-                    className="h-12 w-12 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
+                    className="h-12 w-12 rounded-full shadow-lg object-cover object-center bg-white transition-transform duration-300 hover:scale-110"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 rounded-full bg-gradient-to-r from-sage/20 to-lavender/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
@@ -511,7 +511,7 @@ export default function ManasWellnessWebsite() {
                 <img
                   src="/mwplogo.png.jpg"
                   alt="Manas Wellness Project Logo"
-                  className="h-8 w-8 hover:scale-110 transition-transform duration-300"
+                  className="h-8 w-8 object-cover object-center bg-white hover:scale-110 transition-transform duration-300"
                   loading="lazy"
                 />
                 <span className="text-lg font-semibold">Manas Wellness Project</span>
@@ -541,12 +541,12 @@ export default function ManasWellnessWebsite() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3 scroll-reveal">
               <div className="relative">
-                <img
-                  src="/mwplogo.png.jpg"
-                  alt="Manas Wellness Project Logo"
-                  className="h-12 w-12 rounded-full shadow-lg transition-transform duration-300 hover:scale-110"
-                  loading="lazy"
-                />
+                  <img
+                    src="/mwplogo.png.jpg"
+                    alt="Manas Wellness Project Logo"
+                    className="h-12 w-12 rounded-full shadow-lg object-cover object-center bg-white transition-transform duration-300 hover:scale-110"
+                    loading="lazy"
+                  />
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-sage/20 to-lavender/20 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <div>
@@ -944,7 +944,7 @@ export default function ManasWellnessWebsite() {
               <img
                 src="/mwplogo.png.jpg"
                 alt="Manas Wellness Project Logo"
-                className="h-8 w-8 hover:scale-110 transition-transform duration-300"
+                className="h-8 w-8 object-cover object-center bg-white hover:scale-110 transition-transform duration-300"
                 loading="lazy"
               />
               <span className="text-lg font-semibold">Manas Wellness Project</span>
