@@ -7,10 +7,27 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
+// Log initialization
+console.log('🚀 Stripe webhook route initializing...')
+console.log('🔑 Stripe secret key present:', !!process.env.STRIPE_SECRET_KEY)
+console.log('🔐 Webhook secret present:', !!process.env.STRIPE_WEBHOOK_SECRET)
+
 export async function POST(request: NextRequest) {
+  console.log('🔔 Webhook endpoint hit!')
+  console.log('🌐 Request URL:', request.url)
+  console.log('🔗 Request method:', request.method)
+  
+  // Set headers to prevent redirects
+  const headers = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+  }
+  
   try {
     const body = await request.text()
     const signature = request.headers.get('stripe-signature')!
+    console.log('📝 Webhook body length:', body.length)
+    console.log('🔐 Signature present:', !!signature)
 
     let event: Stripe.Event
 
@@ -79,7 +96,13 @@ export async function POST(request: NextRequest) {
         console.log(`Unhandled event type: ${event.type}`)
     }
 
-    return NextResponse.json({ received: true })
+    return NextResponse.json({ received: true }, { 
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache',
+      }
+    })
   } catch (error) {
     console.error('Error processing webhook:', error)
     return NextResponse.json(
