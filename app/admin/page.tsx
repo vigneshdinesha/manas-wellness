@@ -10,6 +10,23 @@ import { useRouter } from "next/navigation"
 export default function AdminPage() {
   const router = useRouter()
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false)
+  const [sessionChecked, setSessionChecked] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/admin/me')
+      .then((r) => r.json())
+      .then((data: { authenticated: boolean }) => {
+        if (!cancelled) {
+          setIsAdminAuthenticated(!!data.authenticated)
+          setSessionChecked(true)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSessionChecked(true)
+      })
+    return () => { cancelled = true }
+  }, [])
 
   const AdminDashboard = () => {
     const [adminMessages, setAdminMessages] = useState<{
@@ -103,7 +120,12 @@ export default function AdminPage() {
     const pendingCount = adminMessages.filter(m => !m.isApproved).length
     const approvedCount = adminMessages.filter(m => m.isApproved).length
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+      try {
+        await fetch('/api/admin/logout', { method: 'POST' })
+      } catch {
+        // Ignore network error; clear local state regardless.
+      }
       setIsAdminAuthenticated(false)
     }
 
@@ -252,13 +274,26 @@ export default function AdminPage() {
   const AdminLogin = () => {
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
+    const [submitting, setSubmitting] = useState(false)
 
-    const handleLogin = () => {
-      if (password === "manorh00ps") {
-        setIsAdminAuthenticated(true)
-        setError("")
-      } else {
-        setError("Incorrect password")
+    const handleLogin = async () => {
+      setSubmitting(true)
+      setError("")
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        })
+        if (res.ok) {
+          setIsAdminAuthenticated(true)
+        } else {
+          setError(res.status === 401 ? 'Incorrect password' : 'Login failed')
+        }
+      } catch {
+        setError('Network error')
+      } finally {
+        setSubmitting(false)
       }
     }
 
@@ -291,9 +326,9 @@ export default function AdminPage() {
               <Button
                 onClick={handleLogin}
                 className="w-full bg-dark-teal hover:bg-dark-teal/90 text-white"
-                disabled={!password}
+                disabled={!password || submitting}
               >
-                Access Admin Dashboard
+                {submitting ? 'Signing in…' : 'Access Admin Dashboard'}
               </Button>
               
               <Button
@@ -306,6 +341,14 @@ export default function AdminPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-dark-teal" />
       </div>
     )
   }
