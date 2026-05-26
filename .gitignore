@@ -22,6 +22,9 @@ yarn-error.log*
 # Claude Code session files
 .claude/
 
+# macOS Finder metadata
+.DS_Store
+
 # vercel
 .vercel
 

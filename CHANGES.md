@@ -35,6 +35,22 @@ Do them in this order — each step minimizes rework for the next.
   - *Alternative if Vercel Hobby ToS becomes an issue:* Cloudflare Pages — same domain steps, no commercial restriction.
 
 - [x] **4. Lock down `/admin` (hide the password)** — done.
+
+---
+
+## Post-deploy follow-ups
+
+Discovered during deployment; not blocking the main launch but should be cleared.
+
+- [ ] **F1. Real Stripe test keys in Vercel** — current `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` are placeholder strings, so `/api/create-payment-intent` returns 500 (`StripeAuthenticationError: Invalid API Key`). Get real `sk_test_…` + `pk_test_…` from https://dashboard.stripe.com/test/apikeys, paste into Vercel env vars, **redeploy** (the `NEXT_PUBLIC_*` one is inlined at build time).
+
+- [ ] **F2. Stripe webhook signing secret** — `/api/stripe-webhook` currently runs without `STRIPE_WEBHOOK_SECRET`, so signature verification silently fails and payment-complete events can't be trusted. In Stripe Dashboard → Developers → Webhooks → Add endpoint pointing to `https://manaswellness.com/api/stripe-webhook` (after DNS) or the `vercel.app` URL for now. Copy the signing secret into a new `STRIPE_WEBHOOK_SECRET` Vercel env var.
+
+- [ ] **F3. Rotate Neon `DATABASE_URL` password** — the original Neon password was pasted into this conversation, so it's in chat logs. In Neon dashboard → Roles → `neondb_owner` → Reset Password. Then update `.env.local` locally and the Vercel env var.
+
+- [x] **F4. Clean up stale `.env.production`** — deleted. Vercel dashboard env vars are now the single source of truth for production.
+
+- [ ] **F5. Decommission Azure** — once you've confirmed Vercel + Neon are stable for a few days, tear down the Azure App Service and Azure Postgres to stop billing.
   - Move the password check server-side. Two reasonable patterns:
     - **Server Action** `verifyAdminPassword(pw)` that compares against `process.env.ADMIN_PASSWORD` and sets an HttpOnly cookie / signed session.
     - Or a Route Handler `POST /api/admin/login` doing the same.
